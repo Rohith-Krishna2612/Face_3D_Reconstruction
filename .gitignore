@@ -175,6 +175,52 @@ cython_debug/
 #  option (not recommended) you can uncomment the following to ignore the entire idea folder.
 #.idea/
 
+# ============================================================
+# Project-Specific Ignores
+# ============================================================
+
+# Datasets (too large for git - 20GB+)
+data/
+dataset/
+datasets/
+
+# Training outputs
+checkpoints/
+logs/
+output/
+runs/
+wandb/
+
+# Downloaded model weights
+models/
+weights/
+pretrained/
+*.pth
+*.pt
+*.ckpt
+*.safetensors
+
+# Node modules (frontend)
+node_modules/
+frontend/node_modules/
+frontend/build/
+frontend/dist/
+
+# OS-specific
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# IDE
+.vscode/
+.idea/
+
+# Temporary files
+*.tmp
+*.temp
+*.swp
+*~
+
 # Abstra
 # Abstra is an AI-powered process automation framework.
 # Ignore directories containing user credentials, local state, and settings.

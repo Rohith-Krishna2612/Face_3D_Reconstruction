@@ -1,0 +1,62 @@
+# Project Configuration
+project_name: "Face_3D_Reconstruction"
+version: "1.0.0"
+
+# Dataset Configuration
+dataset:
+  name: "FFHQ"
+  path: "./data/ffhq"
+  resolution: 256  # Reduced from 512 to fit in 4GB VRAM and train faster
+  train_split: 0.9
+  val_split: 0.1
+  # For quick testing, you can limit dataset size
+  max_train_samples: null  # Set to e.g. 5000 for faster experimentation
+  max_val_samples: null
+
+# Training Configuration
+# Optimized for RTX 3050 (4GB VRAM)
+training:
+  batch_size: 2  # Reduced for 4GB VRAM
+  num_epochs: 50  # Reduced from 100 for faster initial training
+  learning_rate: 2.0e-4
+  weight_decay: 1.0e-4
+  save_freq: 5  # Save more frequently
+  val_freq: 2  # Validate more often
+  gradient_accumulation_steps: 4  # Simulates batch_size of 8
+  mixed_precision: true  # Enable FP16 to save memory
+  num_workers: 2  # Reduce data loading workers
+  
+# Model Configuration
+model:
+  name: "CodeFormer"
+  input_size: [256, 256]  # Matches dataset resolution
+  num_channels: 3
+  codebook_size: 512  # Reduced from 1024 to save memory
+  code_dim: 256
+  dim: 256  # Reduced from 512 for smaller model
+  
+# Degradation Types
+degradations:
+  blur:
+    kernel_sizes: [15, 21, 25]
+    sigma_range: [0.1, 3.0]
+  gaussian_noise:
+    noise_range: [0, 50]
+  jpeg_compression:
+    quality_range: [10, 95]
+  downsampling:
+    scale_factors: [2, 4, 8]
+
+# Paths
+paths:
+  models: "./models"
+  checkpoints: "./checkpoints"
+  logs: "./logs"
+  data: "./data"
+  output: "./output"
+
+# API Configuration
+api:
+  host: "0.0.0.0"
+  port: 8000
+  debug: true
