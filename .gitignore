@@ -191,8 +191,8 @@ output/
 runs/
 wandb/
 
-# Downloaded model weights
-models/
+# Downloaded model weights (root level only, not src/models/)
+/models/
 weights/
 pretrained/
 *.pth
