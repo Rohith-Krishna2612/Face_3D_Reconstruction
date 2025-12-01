@@ -10,7 +10,7 @@ import cv2
 from typing import List, Tuple, Optional, Dict
 import pandas as pd
 from pathlib import Path
-import kaggle
+# import kaggle  # Only needed for dataset download, not training
 import zipfile
 import shutil
 
