@@ -37,6 +37,10 @@ def create_quick_config(base_config_path, args):
     if args.lr:
         config['training']['learning_rate'] = args.lr
     
+    # CRITICAL: Preserve Drive paths if they exist in base config (for Colab)
+    # Don't override paths that were configured for persistent storage
+    # This ensures checkpoints save to Google Drive, not temporary /content/
+    
     return config
 
 
