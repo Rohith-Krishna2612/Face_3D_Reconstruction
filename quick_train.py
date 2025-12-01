@@ -113,6 +113,8 @@ Examples:
                        help='Only estimate training time, don\'t train')
     parser.add_argument('--gpu-check', action='store_true',
                        help='Check GPU availability and memory')
+    parser.add_argument('--yes', '-y', action='store_true',
+                       help='Skip confirmation prompt')
     
     args = parser.parse_args()
     
@@ -174,7 +176,7 @@ Examples:
         return
     
     # Confirm before long training
-    if hours > 24:
+    if hours > 24 and not args.yes:
         response = input(f"⚠️  This will take ~{days:.1f} days. Continue? (y/N): ")
         if response.lower() != 'y':
             print("Training cancelled.")
