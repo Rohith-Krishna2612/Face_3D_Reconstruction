@@ -45,10 +45,10 @@ def estimate_training_time(config):
     batch_size = config['training']['batch_size']
     epochs = config['training']['num_epochs']
     resolution = config['dataset']['resolution']
-    max_samples = config['dataset'].get('max_train_samples', 70000)
+    max_samples = config['dataset'].get('max_train_samples', 52000)
     
     if max_samples is None:
-        max_samples = 70000  # Assume full FFHQ
+        max_samples = 52000  # Assume full FFHQ (52,001 images)
     
     # Rough estimates (adjust based on your GPU)
     batches_per_epoch = max_samples // batch_size
