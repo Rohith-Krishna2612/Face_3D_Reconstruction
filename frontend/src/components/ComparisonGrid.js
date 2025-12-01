@@ -222,17 +222,30 @@ function ComparisonGrid({ results, onReset }) {
   return (
     <GridContainer>
       <OriginalSection>
-        <SectionTitle>📸 Original Image</SectionTitle>
-        <OriginalImage 
-          src={results.original} 
-          alt="Original" 
-          onClick={() => openModal(results.original, 'Original Image')}
-        />
+        <SectionTitle>✨ Original Image Enhancement</SectionTitle>
+        <div style={{display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '30px', maxWidth: '900px', margin: '0 auto'}}>
+          <div>
+            <h4 style={{textAlign: 'center', marginBottom: '15px'}}>Original Input</h4>
+            <OriginalImage 
+              src={results.original} 
+              alt="Original" 
+              onClick={() => openModal(results.original, 'Original Input')}
+            />
+          </div>
+          <div>
+            <h4 style={{textAlign: 'center', marginBottom: '15px'}}>Enhanced Output</h4>
+            <OriginalImage 
+              src={results.original_restored} 
+              alt="Original Enhanced" 
+              onClick={() => openModal(results.original_restored, 'Enhanced Output')}
+            />
+          </div>
+        </div>
       </OriginalSection>
 
-      <SectionTitle>🔄 Degradation & Restoration Comparisons</SectionTitle>
+      <SectionTitle>🔬 4 Degradation Types & Restoration Results</SectionTitle>
       <div style={{ marginBottom: '20px', textAlign: 'center', color: '#666', fontSize: '0.95rem' }}>
-        Each row shows: <strong>Original Restored</strong> → <strong>Degraded Version</strong> → <strong>Restored from Degraded</strong>
+        Each row shows: <strong>Original</strong> → <strong>Degraded Version</strong> → <strong>AI Restored</strong>
       </div>
       
       {Object.entries(results.results).map(([degradationType, data]) => (
@@ -242,12 +255,12 @@ function ComparisonGrid({ results, onReset }) {
           </CardTitle>
           
           <ImageTriple>
-            <ImageContainer onClick={() => openModal(results.original, 'Original Restored Image')}>
+            <ImageContainer onClick={() => openModal(results.original, 'Original Image')}>
               <ComparisonImage 
                 src={results.original} 
-                alt="Original restored" 
+                alt="Original" 
               />
-              <ImageLabel>Original Restored</ImageLabel>
+              <ImageLabel>Original</ImageLabel>
             </ImageContainer>
             
             <ImageContainer onClick={() => openModal(data.degraded, `${degradationType} - Degraded`)}>
@@ -263,7 +276,7 @@ function ComparisonGrid({ results, onReset }) {
                 src={data.restored} 
                 alt={`${degradationType} restored`} 
               />
-              <ImageLabel>Restored from Degraded</ImageLabel>
+              <ImageLabel>AI Restored</ImageLabel>
             </ImageContainer>
           </ImageTriple>
           

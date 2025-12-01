@@ -14,7 +14,7 @@ const AppContainer = styled.div`
 `;
 
 const MainContent = styled.div`
-  max-width: 1400px;
+  max-width: 1600px;
   margin: 0 auto;
   background: white;
   border-radius: 15px;
@@ -40,13 +40,14 @@ function App() {
       const formData = new FormData();
       formData.append('file', file);
 
-      const response = await fetch('/upload-image/', {
+      const response = await fetch('http://localhost:8000/upload-image/', {
         method: 'POST',
         body: formData,
       });
 
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        const errorData = await response.json();
+        throw new Error(errorData.detail || `HTTP error! status: ${response.status}`);
       }
 
       const data = await response.json();
@@ -100,7 +101,7 @@ function App() {
               borderRadius: '10px',
               margin: '20px 0'
             }}>
-              <h3>Error</h3>
+              <h3>❌ Error</h3>
               <p>{error}</p>
               <button 
                 onClick={handleReset}
@@ -111,7 +112,8 @@ function App() {
                   padding: '10px 20px',
                   borderRadius: '5px',
                   cursor: 'pointer',
-                  marginTop: '10px'
+                  marginTop: '10px',
+                  fontSize: '16px'
                 }}
               >
                 Try Again

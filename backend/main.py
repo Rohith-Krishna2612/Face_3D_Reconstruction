@@ -116,8 +116,22 @@ def process_uploaded_image(file_content: bytes) -> np.ndarray:
 
 
 def apply_degradations(image: np.ndarray) -> Dict[str, np.ndarray]:
-    """Apply all degradation types to image."""
-    return degradation_pipeline.apply_multiple_degradations(image)
+    """Apply all 4 degradation types to image."""
+    degradations = {}
+    
+    # 1. Blur
+    degradations['blur'] = degradation_pipeline.apply_blur(image)
+    
+    # 2. Gaussian Noise
+    degradations['gaussian_noise'] = degradation_pipeline.apply_gaussian_noise(image)
+    
+    # 3. JPEG Compression
+    degradations['jpeg_compression'] = degradation_pipeline.apply_jpeg_compression(image)
+    
+    # 4. Downsampling
+    degradations['downsampling'] = degradation_pipeline.apply_downsampling(image)
+    
+    return degradations
 
 
 def restore_image(degraded_image: np.ndarray, restoration_strength: float = 0.5) -> np.ndarray:
@@ -163,7 +177,7 @@ def numpy_to_base64(image: np.ndarray) -> str:
 
 @app.post("/upload-image/")
 async def upload_image(file: UploadFile = File(...)):
-    """Upload an image and get degradations + restorations."""
+    """Upload an image and get 4 degradations + 5 restorations (original + 4 degraded)."""
     
     # Validate file type
     if not file.content_type.startswith('image/'):
@@ -176,18 +190,22 @@ async def upload_image(file: UploadFile = File(...)):
         # Process image
         original_image = process_uploaded_image(file_content)
         
-        # Apply degradations
-        degraded_images = apply_degradations(original_image)
+        # Resize original to consistent size
+        target_size = tuple(config['model']['input_size'])
+        original_resized = cv2.resize(original_image, target_size, interpolation=cv2.INTER_LINEAR)
         
-        # Restore each degraded image
+        # Restore original image (enhancement)
+        original_restored = restore_image(original_resized, restoration_strength=0.5)
+        
+        # Apply 4 degradations
+        degraded_images = apply_degradations(original_resized)
+        
+        # Restore each of the 4 degraded images
         restoration_results = {}
         
         for degradation_type, degraded_image in degraded_images.items():
-            if degradation_type == 'original':
-                continue
-                
             # Restore the degraded image
-            restored_image = restore_image(degraded_image)
+            restored_image = restore_image(degraded_image, restoration_strength=0.5)
             
             restoration_results[degradation_type] = {
                 'degraded': numpy_to_base64(degraded_image),
@@ -196,7 +214,8 @@ async def upload_image(file: UploadFile = File(...)):
         
         return {
             'success': True,
-            'original': numpy_to_base64(original_image),
+            'original': numpy_to_base64(original_resized),
+            'original_restored': numpy_to_base64(original_restored),
             'results': restoration_results
         }
         
