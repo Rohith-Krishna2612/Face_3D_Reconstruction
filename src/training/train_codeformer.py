@@ -72,13 +72,27 @@ class CodeFormerTrainer:
     
     def setup_directories(self):
         """Setup training directories."""
-        self.dirs = setup_directories(os.getcwd())
+        # Use paths from config if specified (for Colab/Drive), otherwise use project root
+        base_paths = self.config.get('paths', {})
         
-        # Additional training directories
-        self.checkpoint_dir = os.path.join(self.dirs['checkpoints'], 'codeformer')
-        self.log_dir = os.path.join(self.dirs['logs'], 'codeformer')
-        self.sample_dir = os.path.join(self.dirs['output'], 'samples')
+        if 'checkpoints' in base_paths and base_paths['checkpoints'].startswith('/content/drive'):
+            # Using Google Drive paths - don't call setup_directories, use config directly
+            self.checkpoint_dir = os.path.join(base_paths['checkpoints'], 'codeformer')
+            self.log_dir = os.path.join(base_paths['logs'], 'codeformer')
+            self.sample_dir = os.path.join(base_paths['output'], 'samples')
+            
+            print(f"✅ Using Google Drive storage:")
+            print(f"   Checkpoints: {self.checkpoint_dir}")
+            print(f"   Logs: {self.log_dir}")
+            print(f"   Samples: {self.sample_dir}")
+        else:
+            # Local training - use project root
+            self.dirs = setup_directories(os.getcwd())
+            self.checkpoint_dir = os.path.join(self.dirs['checkpoints'], 'codeformer')
+            self.log_dir = os.path.join(self.dirs['logs'], 'codeformer')
+            self.sample_dir = os.path.join(self.dirs['output'], 'samples')
         
+        # Create the final directories
         for directory in [self.checkpoint_dir, self.log_dir, self.sample_dir]:
             os.makedirs(directory, exist_ok=True)
     
