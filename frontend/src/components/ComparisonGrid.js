@@ -34,7 +34,7 @@ const SectionTitle = styled.h2`
   text-align: center;
 `;
 
-const ComparisonGrid = styled.div`
+const DegradationGrid = styled.div`
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
   gap: 25px;
@@ -131,6 +131,82 @@ const QualityBadge = styled.span`
   font-size: 0.8rem;
 `;
 
+const MetricsContainer = styled.div`
+  background: #f8f9fa;
+  border-radius: 8px;
+  padding: 15px;
+  margin-top: 15px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  border: 2px solid #e9ecef;
+`;
+
+const MetricItem = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 10px;
+  background: white;
+  border-radius: 6px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+`;
+
+const MetricLabel = styled.div`
+  font-size: 0.75rem;
+  color: #666;
+  margin-bottom: 5px;
+  text-transform: uppercase;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+`;
+
+const MetricValue = styled.div`
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: ${props => {
+    if (props.value >= 0.8) return '#28a745';
+    if (props.value >= 0.6) return '#ffc107';
+    return '#dc3545';
+  }};
+`;
+
+const ImprovementBadge = styled.div`
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 10px;
+  background: ${props => props.improvement > 0 ? '#d4edda' : '#f8d7da'};
+  color: ${props => props.improvement > 0 ? '#155724' : '#721c24'};
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 0.9rem;
+`;
+
+const ButtonContainer = styled.div`
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  margin: 30px 0;
+  flex-wrap: wrap;
+`;
+
+const BackButton = styled.button`
+  background: linear-gradient(135deg, #6c757d 0%, #495057 100%);
+  color: white;
+  border: none;
+  padding: 15px 40px;
+  border-radius: 30px;
+  font-size: 1.1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 5px 15px rgba(108,117,125,0.3);
+  
+  &:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(108,117,125,0.4);
+  }
+`;
+
 const ResetButton = styled.button`
   background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
   color: white;
@@ -140,8 +216,6 @@ const ResetButton = styled.button`
   font-size: 1.1rem;
   cursor: pointer;
   transition: all 0.3s ease;
-  margin: 30px auto;
-  display: block;
   box-shadow: 0 5px 15px rgba(0,123,255,0.3);
   
   &:hover {
@@ -292,12 +366,42 @@ function ComparisonGrid({ results, onReset }) {
               Click to zoom
             </div>
           </QualityIndicator>
+          
+          {data.metrics && (
+            <MetricsContainer>
+              <MetricItem>
+                <MetricLabel>Degraded Quality</MetricLabel>
+                <MetricValue value={data.metrics.ssim_degraded}>
+                  {data.metrics.ssim_degraded.toFixed(3)}
+                </MetricValue>
+                <div style={{ fontSize: '0.7rem', color: '#999', marginTop: '3px' }}>SSIM Score</div>
+              </MetricItem>
+              
+              <MetricItem>
+                <MetricLabel>Restored Quality</MetricLabel>
+                <MetricValue value={data.metrics.ssim_restored}>
+                  {data.metrics.ssim_restored.toFixed(3)}
+                </MetricValue>
+                <div style={{ fontSize: '0.7rem', color: '#999', marginTop: '3px' }}>SSIM Score</div>
+              </MetricItem>
+              
+              <ImprovementBadge improvement={data.metrics.improvement_percent}>
+                {data.metrics.improvement_percent > 0 ? '📈' : '📉'} 
+                Quality Improvement: {data.metrics.improvement_percent > 0 ? '+' : ''}{data.metrics.improvement_percent.toFixed(1)}%
+              </ImprovementBadge>
+            </MetricsContainer>
+          )}
         </ComparisonCard>
       ))}
 
-      <ResetButton onClick={onReset}>
-        🔄 Process New Image
-      </ResetButton>
+      <ButtonContainer>
+        <BackButton onClick={onReset}>
+          ← Back to Upload
+        </BackButton>
+        <ResetButton onClick={onReset}>
+          🔄 Process New Image
+        </ResetButton>
+      </ButtonContainer>
 
       {modalImage && (
         <ModalOverlay onClick={closeModal}>

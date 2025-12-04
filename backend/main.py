@@ -6,6 +6,7 @@ from fastapi import FastAPI, File, UploadFile, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
+from contextlib import asynccontextmanager
 import torch
 import numpy as np
 import cv2
@@ -18,6 +19,7 @@ from typing import List, Dict, Any
 import yaml
 from pathlib import Path
 import base64
+from skimage.metrics import structural_similarity as ssim
 
 # Add project root to Python path
 project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -30,22 +32,6 @@ from src.utils import (
     get_device, load_checkpoint
 )
 
-# Initialize FastAPI app
-app = FastAPI(
-    title="Face 3D Reconstruction API",
-    description="API for face restoration and 3D reconstruction",
-    version="1.0.0"
-)
-
-# CORS middleware
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],  # Configure appropriately for production
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
-
 # Global variables
 model = None
 degradation_pipeline = None
@@ -53,8 +39,17 @@ device = None
 config = None
 
 
-def load_config(config_path: str = "config.yaml") -> Dict[str, Any]:
+def load_config(config_path: str = None) -> Dict[str, Any]:
     """Load configuration from YAML file."""
+    if config_path is None:
+        # Try to find config.yaml in parent directory (project root)
+        backend_dir = os.path.dirname(os.path.abspath(__file__))
+        project_root = os.path.dirname(backend_dir)
+        config_path = os.path.join(project_root, 'config.yaml')
+    
+    if not os.path.exists(config_path):
+        raise FileNotFoundError(f"Config file not found at: {config_path}")
+    
     with open(config_path, 'r') as f:
         return yaml.safe_load(f)
 
@@ -72,8 +67,10 @@ def initialize_model():
     # Create model
     model = create_codeformer_model(config).to(device)
     
-    # Load trained weights if available
-    checkpoint_path = os.path.join("checkpoints", "codeformer", "best_checkpoint.pth")
+    # Load trained weights if available (look in project root)
+    backend_dir = os.path.dirname(os.path.abspath(__file__))
+    project_root = os.path.dirname(backend_dir)
+    checkpoint_path = os.path.join(project_root, "checkpoints", "codeformer", "best_checkpoint.pth")
     if os.path.exists(checkpoint_path):
         try:
             checkpoint = torch.load(checkpoint_path, map_location=device)
@@ -91,10 +88,33 @@ def initialize_model():
     print("Model initialized successfully!")
 
 
-@app.on_event("startup")
-async def startup_event():
-    """Initialize model on startup."""
+# Use lifespan context manager instead of deprecated on_event
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """Lifespan context manager for startup and shutdown events."""
+    # Startup
     initialize_model()
+    yield
+    # Shutdown (if needed)
+    pass
+
+
+# Initialize FastAPI app with lifespan
+app = FastAPI(
+    title="Face 3D Reconstruction API",
+    description="API for face restoration and 3D reconstruction",
+    version="1.0.0",
+    lifespan=lifespan
+)
+
+# CORS middleware
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # Configure appropriately for production
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 
 def process_uploaded_image(file_content: bytes) -> np.ndarray:
@@ -175,6 +195,44 @@ def numpy_to_base64(image: np.ndarray) -> str:
     return f"data:image/jpeg;base64,{img_base64}"
 
 
+def calculate_metrics(original: np.ndarray, degraded: np.ndarray, restored: np.ndarray) -> Dict[str, float]:
+    """Calculate SSIM metrics for quality comparison."""
+    try:
+        # Ensure images are the same size
+        if original.shape != degraded.shape:
+            degraded = cv2.resize(degraded, (original.shape[1], original.shape[0]))
+        if original.shape != restored.shape:
+            restored = cv2.resize(restored, (original.shape[1], original.shape[0]))
+        
+        # Convert to grayscale for SSIM calculation
+        original_gray = cv2.cvtColor(original, cv2.COLOR_RGB2GRAY)
+        degraded_gray = cv2.cvtColor(degraded, cv2.COLOR_RGB2GRAY)
+        restored_gray = cv2.cvtColor(restored, cv2.COLOR_RGB2GRAY)
+        
+        # Calculate SSIM
+        ssim_degraded = ssim(original_gray, degraded_gray, data_range=255)
+        ssim_restored = ssim(original_gray, restored_gray, data_range=255)
+        
+        # Calculate improvement percentage
+        if ssim_degraded > 0:
+            improvement = ((ssim_restored - ssim_degraded) / ssim_degraded) * 100
+        else:
+            improvement = 0
+        
+        return {
+            'ssim_degraded': round(ssim_degraded, 3),
+            'ssim_restored': round(ssim_restored, 3),
+            'improvement_percent': round(improvement, 1)
+        }
+    except Exception as e:
+        print(f"Error calculating metrics: {e}")
+        return {
+            'ssim_degraded': 0.0,
+            'ssim_restored': 0.0,
+            'improvement_percent': 0.0
+        }
+
+
 @app.post("/upload-image/")
 async def upload_image(file: UploadFile = File(...)):
     """Upload an image and get 4 degradations + 5 restorations (original + 4 degraded)."""
@@ -207,9 +265,13 @@ async def upload_image(file: UploadFile = File(...)):
             # Restore the degraded image
             restored_image = restore_image(degraded_image, restoration_strength=0.5)
             
+            # Calculate quality metrics
+            metrics = calculate_metrics(original_resized, degraded_image, restored_image)
+            
             restoration_results[degradation_type] = {
                 'degraded': numpy_to_base64(degraded_image),
-                'restored': numpy_to_base64(restored_image)
+                'restored': numpy_to_base64(restored_image),
+                'metrics': metrics
             }
         
         return {

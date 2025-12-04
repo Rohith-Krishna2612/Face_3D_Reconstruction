@@ -419,7 +419,7 @@ class CodeFormerTrainer:
     def save_model_checkpoint(self, epoch: int, val_loss: float, is_best: bool = False):
         """Save model checkpoint."""
         checkpoint_data = {
-            'epoch': epoch,
+            'epoch': epoch + 1,  # Save next epoch to resume from
             'generator_state_dict': self.generator.state_dict(),
             'discriminator_state_dict': self.discriminator.state_dict(),
             'optimizer_g_state_dict': self.optimizer_g.state_dict(),
