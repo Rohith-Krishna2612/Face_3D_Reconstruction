@@ -1,8 +1,8 @@
-# Face 3D Reconstruction 🎭
+# Face 3D Reconstruction
 
 A comprehensive AI-powered face restoration and interactive 3D face reconstruction pipeline using CodeFormer for restoration and DECA for 3D output.
 
-## ✨ Features
+## Features
 
 - **Face Restoration**: Advanced AI model for restoring degraded face images
 - **Multiple Degradations**: Handles blur, noise, JPEG compression, and downsampling
@@ -11,7 +11,7 @@ A comprehensive AI-powered face restoration and interactive 3D face reconstructi
 - **Training Pipeline**: Complete training setup with FFHQ dataset support
 - **Real-time Processing**: FastAPI backend with React frontend
 
-## 🏗️ Architecture
+## Architecture
 
 ### Phase 1: Face Enhancement & Restoration
 - **Model**: CodeFormer (VQGAN + Transformer)
@@ -30,7 +30,7 @@ A comprehensive AI-powered face restoration and interactive 3D face reconstructi
 - **Output**: Interactive 3D face mesh rendered in the same web interface
 - **Training Assumption**: Uses custom-data trained DECA weights
 
-## 🚀 Quick Start
+## Quick Start
 
 ### 1. Environment Setup
 ```bash
@@ -95,7 +95,7 @@ bash start_dev.sh
 3. Run 3D reconstruction (DECA)
 4. Interact with the 3D face in-browser (rotate, zoom, pan)
 
-## 📁 Project Structure
+## Project Structure
 
 ```
 Face_3D_Reconstruction/
@@ -124,7 +124,7 @@ Face_3D_Reconstruction/
 └── config.yaml             # Configuration
 ```
 
-## 🔧 Configuration
+## Configuration
 
 Edit `config.yaml` to customize:
 - Model architecture parameters
@@ -132,7 +132,7 @@ Edit `config.yaml` to customize:
 - Degradation settings
 - Dataset paths
 
-## 🎯 Usage
+## Usage
 
 ### Training Your Own Model
 1. **Prepare Dataset**: Download FFHQ or use your own face dataset
@@ -158,16 +158,16 @@ Edit `config.yaml` to customize:
 - **Suggested export formats**: OBJ for mesh, JSON/NPZ for DECA parameters
 - **Best input quality**: Frontal or near-frontal faces, clear lighting, minimal occlusion
 
-## 📊 Degradation Types
+## Degradation Types
 
 | Type | Description | Parameters |
 |------|-------------|------------|
-| 🌫️ Blur | Gaussian blur | Kernel size, sigma |
-| 🔇 Noise | Gaussian noise | Noise level (0-50) |
-| 📱 JPEG | Compression artifacts | Quality (10-95) |
-| 🔍 Downsampling | Resolution reduction | Scale factors (2x, 4x, 8x) |
+| Blur | Gaussian blur | Kernel size, sigma |
+| Noise | Gaussian noise | Noise level (0-50) |
+| JPEG | Compression artifacts | Quality (10-95) |
+| Downsampling | Resolution reduction | Scale factors (2x, 4x, 8x) |
 
-## 🛠️ Development
+## Development
 
 ### Backend Development
 ```bash
@@ -190,13 +190,13 @@ npm start
 2. **New Model**: Implement in `src/models/`
 3. **UI Changes**: Modify React components
 
-## 📈 Performance
+## Performance
 
 - **Training**: ~24 hours on RTX 3090 for 100 epochs
 - **Inference**: ~0.5-2 seconds per 512x512 image
 - **Memory**: ~8GB GPU memory for training
 
-## 🐛 Troubleshooting
+## Troubleshooting
 
 ### Common Issues
 1. **CUDA Out of Memory**: Reduce batch size in config
@@ -209,7 +209,7 @@ npm start
 - Enable debug mode in config
 - Review error messages in terminal
 
-## 📝 TODO / Future Work
+## TODO / Future Work
 
 - [ ] Add more degradation types
 - [x] Add DECA-based interactive 3D face reconstruction in web app flow
@@ -218,7 +218,7 @@ npm start
 - [ ] Docker containerization
 - [ ] Model quantization for faster inference
 
-## 🤝 Contributing
+## Contributing
 
 1. Fork the repository
 2. Create feature branch
@@ -226,11 +226,11 @@ npm start
 4. Add tests
 5. Submit pull request
 
-## 📄 License
+## License
 
 MIT License - see LICENSE file for details
 
-## 🙏 Acknowledgments
+## Acknowledgments
 
 - CodeFormer paper and implementation
 - DECA project and authors for 3D face reconstruction
@@ -238,10 +238,10 @@ MIT License - see LICENSE file for details
 - PyTorch and React communities
 - FastAPI framework
 
-## 📧 Contact
+## Contact
 
 For questions or support, please open an issue on GitHub.
 
 ---
 
-**Happy Face Restoration! 🎭✨**
+**Happy Face Restoration!**

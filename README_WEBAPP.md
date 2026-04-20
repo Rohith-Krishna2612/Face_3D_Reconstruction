@@ -2,7 +2,7 @@
 
 This web app now includes interactive 3D face output in the same UI using DECA (assumed to be trained on custom data).
 
-## 🚀 Quick Start
+## Quick Start
 
 ### Prerequisites
 ```bash
@@ -38,7 +38,7 @@ cd frontend
 npm start
 ```
 
-## 📊 Application Flow
+## Application Flow
 
 ### Input
 - Upload a face image (JPEG, PNG, BMP, WebP)
@@ -48,10 +48,10 @@ npm start
 ### Processing
 1. **Original Enhancement**: Model enhances the original image
 2. **4 Degradations Applied**:
-   - 🌫️ Gaussian Blur
-   - 🔇 Gaussian Noise  
-   - 📱 JPEG Compression
-   - 🔍 Downsampling
+  - Gaussian Blur
+  - Gaussian Noise  
+  - JPEG Compression
+  - Downsampling
 3. **AI Restoration**: Model restores each degraded image
 4. **3D Reconstruction (DECA)**: Model predicts 3D face shape/expression and renders an interactive mesh
 
@@ -61,7 +61,7 @@ Total: **5 restored images + 1 interactive 3D output**
 - 4 restored degraded versions
 - 1 DECA-based interactive 3D face viewer in the same page
 
-## 🎨 Interface Layout
+## Interface Layout
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
@@ -102,7 +102,7 @@ Total: **5 restored images + 1 interactive 3D output**
 └─────────────────────────────────────────────────────────────┘
 ```
 
-## 🔧 API Endpoints
+## API Endpoints
 
 ### Upload & Process Image
 ```
@@ -142,19 +142,19 @@ GET /model-info/
 GET /health/
 ```
 
-## 📝 Features
+## Features
 
-✅ **Drag & Drop Upload** - Easy image upload interface
-✅ **Live Preview** - See your image before processing
-✅ **4 Degradation Types** - Comprehensive testing
-✅ **5 Restoration Outputs** - Original + 4 degraded versions
-✅ **Interactive 3D Face Output** - DECA mesh in same webpage
-✅ **Click to Zoom** - Modal view for detailed inspection
-✅ **Responsive Design** - Works on desktop and tablet
-✅ **Error Handling** - User-friendly error messages
-✅ **Progress Indicator** - Loading spinner during processing
+- **Drag and Drop Upload**: Easy image upload interface
+- **Live Preview**: See your image before processing
+- **4 Degradation Types**: Comprehensive testing
+- **5 Restoration Outputs**: Original + 4 degraded versions
+- **Interactive 3D Face Output**: DECA mesh in same webpage
+- **Click to Zoom**: Modal view for detailed inspection
+- **Responsive Design**: Works on desktop and tablet
+- **Error Handling**: User-friendly error messages
+- **Progress Indicator**: Loading spinner during processing
 
-## 🎯 Technical Details
+## Technical Details
 
 ### Backend (FastAPI)
 - **Framework**: FastAPI with Uvicorn
@@ -173,7 +173,7 @@ GET /health/
 - **API Calls**: Fetch API
 - **3D Rendering**: WebGL viewer (for DECA mesh interaction)
 
-## ▶️ Run It (Windows)
+## Run It (Windows)
 
 From project root:
 
@@ -218,7 +218,7 @@ downsampling:
   scale_factors: [2, 4, 8]
 ```
 
-## 🐛 Troubleshooting
+## Troubleshooting
 
 ### Backend Issues
 
@@ -255,7 +255,7 @@ npm cache clean --force
 npm install
 ```
 
-## 📊 Performance
+## Performance
 
 | Configuration | Processing Time | VRAM Usage |
 |--------------|-----------------|------------|
@@ -263,14 +263,14 @@ npm install
 | RTX 3060 (12GB) | ~1-2 sec/image | 3GB |
 | CPU Only | ~30-60 sec/image | N/A (16GB RAM) |
 
-## 🎓 Academic Usage
+## Academic Usage
 
 This interface demonstrates:
-- ✅ Real-time AI face restoration
-- ✅ Multiple degradation types
-- ✅ Before/after comparison
-- ✅ Interactive DECA-based 3D face output
-- ✅ Production-ready web application
+- Real-time AI face restoration
+- Multiple degradation types
+- Before/after comparison
+- Interactive DECA-based 3D face output
+- Production-ready web application
 
 Perfect for:
 - Project demonstrations
@@ -278,11 +278,11 @@ Perfect for:
 - Research paper figures
 - Interactive demos
 
-## 📄 License
+## License
 
 MIT License - see LICENSE file
 
-## 🤝 Contributing
+## Contributing
 
 1. Fork the repository
 2. Create feature branch
