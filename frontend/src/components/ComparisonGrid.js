@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
+import Face3DViewer from './Face3DViewer';
 
 const GridContainer = styled.div`
   margin: 30px 0;
@@ -316,6 +317,8 @@ function ComparisonGrid({ results, onReset }) {
           </div>
         </div>
       </OriginalSection>
+
+      {results.deca_3d && <Face3DViewer deca3d={results.deca_3d} />}
 
       <SectionTitle>🔬 4 Degradation Types & Restoration Results</SectionTitle>
       <div style={{ marginBottom: '20px', textAlign: 'center', color: '#666', fontSize: '0.95rem' }}>

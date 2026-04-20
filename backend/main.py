@@ -2,7 +2,7 @@
 FastAPI backend for face restoration and 3D reconstruction.
 """
 
-from fastapi import FastAPI, File, UploadFile, HTTPException
+from fastapi import FastAPI, File, UploadFile, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
@@ -37,6 +37,7 @@ model = None
 degradation_pipeline = None
 device = None
 config = None
+outputs_dir = None
 
 
 def load_config(config_path: str = None) -> Dict[str, Any]:
@@ -56,10 +57,14 @@ def load_config(config_path: str = None) -> Dict[str, Any]:
 
 def initialize_model():
     """Initialize the CodeFormer model."""
-    global model, degradation_pipeline, device, config
+    global model, degradation_pipeline, device, config, outputs_dir
     
     # Load configuration
     config = load_config()
+
+    backend_dir = os.path.dirname(os.path.abspath(__file__))
+    outputs_dir = os.path.join(backend_dir, "outputs")
+    os.makedirs(outputs_dir, exist_ok=True)
     
     # Get device
     device = get_device()
@@ -68,7 +73,6 @@ def initialize_model():
     model = create_codeformer_model(config).to(device)
     
     # Load trained weights if available (look in project root)
-    backend_dir = os.path.dirname(os.path.abspath(__file__))
     project_root = os.path.dirname(backend_dir)
     checkpoint_path = os.path.join(project_root, "checkpoints", "codeformer", "best_checkpoint.pth")
     if os.path.exists(checkpoint_path):
@@ -233,8 +237,58 @@ def calculate_metrics(original: np.ndarray, degraded: np.ndarray, restored: np.n
         }
 
 
+def generate_depth_mesh_obj(image: np.ndarray, output_path: str, grid_size: int = 96) -> None:
+    """Create a lightweight interactive OBJ mesh from image luminance as a 3D fallback."""
+    gray = cv2.cvtColor(image, cv2.COLOR_RGB2GRAY)
+    gray = cv2.resize(gray, (grid_size, grid_size), interpolation=cv2.INTER_AREA)
+    gray = cv2.GaussianBlur(gray, (5, 5), 0)
+    depth = gray.astype(np.float32) / 255.0
+
+    with open(output_path, 'w', encoding='utf-8') as f:
+        f.write("# Auto-generated face depth mesh\n")
+
+        # Vertices
+        for y in range(grid_size):
+            for x in range(grid_size):
+                nx = (x / (grid_size - 1)) * 2.0 - 1.0
+                ny = 1.0 - (y / (grid_size - 1)) * 2.0
+                z = (depth[y, x] - 0.5) * 0.55
+                f.write(f"v {nx:.6f} {ny:.6f} {z:.6f}\n")
+
+        # Faces (two triangles per cell)
+        def vid(ix: int, iy: int) -> int:
+            return iy * grid_size + ix + 1
+
+        for y in range(grid_size - 1):
+            for x in range(grid_size - 1):
+                v1 = vid(x, y)
+                v2 = vid(x + 1, y)
+                v3 = vid(x, y + 1)
+                v4 = vid(x + 1, y + 1)
+                f.write(f"f {v1} {v2} {v3}\n")
+                f.write(f"f {v2} {v4} {v3}\n")
+
+
+def create_deca_output(restored_image: np.ndarray, request: Request) -> Dict[str, Any]:
+    """Return DECA-compatible 3D output metadata for frontend visualization."""
+    if outputs_dir is None:
+        raise RuntimeError("Outputs directory is not initialized")
+
+    mesh_name = f"face_{uuid.uuid4().hex}.obj"
+    mesh_path = os.path.join(outputs_dir, mesh_name)
+    generate_depth_mesh_obj(restored_image, mesh_path)
+
+    # Keep this contract stable for future real DECA integration.
+    return {
+        "available": True,
+        "method": "deca-compatible-fallback",
+        "note": "Interactive 3D view is enabled. Plug custom DECA weights into this endpoint for full DECA inference.",
+        "mesh_url": str(request.base_url).rstrip('/') + f"/outputs/{mesh_name}"
+    }
+
+
 @app.post("/upload-image/")
-async def upload_image(file: UploadFile = File(...)):
+async def upload_image(request: Request, file: UploadFile = File(...)):
     """Upload an image and get 4 degradations + 5 restorations (original + 4 degraded)."""
     
     # Validate file type
@@ -274,10 +328,13 @@ async def upload_image(file: UploadFile = File(...)):
                 'metrics': metrics
             }
         
+        deca_output = create_deca_output(original_restored, request)
+
         return {
             'success': True,
             'original': numpy_to_base64(original_resized),
             'original_restored': numpy_to_base64(original_restored),
+            'deca_3d': deca_output,
             'results': restoration_results
         }
         
@@ -377,6 +434,11 @@ async def get_degradation_types():
 
 
 # Mount static files for serving frontend (if needed)
+backend_dir_for_mount = os.path.dirname(os.path.abspath(__file__))
+outputs_dir_for_mount = os.path.join(backend_dir_for_mount, "outputs")
+os.makedirs(outputs_dir_for_mount, exist_ok=True)
+app.mount("/outputs", StaticFiles(directory=outputs_dir_for_mount), name="outputs")
+
 if os.path.exists("frontend/build"):
     app.mount("/static", StaticFiles(directory="frontend/build/static"), name="static")
     

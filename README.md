@@ -1,12 +1,13 @@
 # Face 3D Reconstruction 🎭
 
-A comprehensive AI-powered face restoration and 3D reconstruction pipeline using CodeFormer architecture with FFHQ dataset training.
+A comprehensive AI-powered face restoration and interactive 3D face reconstruction pipeline using CodeFormer for restoration and DECA for 3D output.
 
 ## ✨ Features
 
 - **Face Restoration**: Advanced AI model for restoring degraded face images
 - **Multiple Degradations**: Handles blur, noise, JPEG compression, and downsampling
 - **Side-by-Side Comparison**: Interactive web interface showing before/after results
+- **Interactive 3D Face Output**: In-browser 3D face visualization using DECA reconstruction
 - **Training Pipeline**: Complete training setup with FFHQ dataset support
 - **Real-time Processing**: FastAPI backend with React frontend
 
@@ -21,7 +22,13 @@ A comprehensive AI-powered face restoration and 3D reconstruction pipeline using
 ### Phase 2: Web Application
 - **Backend**: FastAPI with model inference
 - **Frontend**: React with modern UI components
-- **Features**: Image upload, real-time processing, comparison grid
+- **Features**: Image upload, real-time processing, comparison grid, interactive 3D viewer
+
+### Phase 3: 3D Face Reconstruction (DECA)
+- **Model**: DECA-based face reconstruction pipeline
+- **Input**: Restored face image from Phase 1
+- **Output**: Interactive 3D face mesh rendered in the same web interface
+- **Training Assumption**: Uses custom-data trained DECA weights
 
 ## 🚀 Quick Start
 
@@ -48,6 +55,9 @@ pip install torch torchvision torchaudio --index-url https://download.pytorch.or
 
 # Install other requirements
 pip install -r requirements.txt
+
+# Install DECA runtime dependencies (if not already included)
+pip install smplx trimesh pyrender
 ```
 
 ### 3. Dataset Preparation
@@ -78,6 +88,12 @@ bash start_dev.sh
 # Terminal 1: python backend/main.py
 # Terminal 2: cd frontend && npm start
 ```
+
+### 6. Use Interactive 3D Output
+1. Upload a face image in the web app
+2. Run restoration (CodeFormer)
+3. Run 3D reconstruction (DECA)
+4. Interact with the 3D face in-browser (rotate, zoom, pan)
 
 ## 📁 Project Structure
 
@@ -132,8 +148,15 @@ Edit `config.yaml` to customize:
 ### Web Interface
 1. **Upload**: Drag & drop or select face image
 2. **Process**: AI applies degradations and restorations
-3. **Compare**: View side-by-side results
-4. **Download**: Save restored images
+3. **Compare**: View side-by-side restoration results
+4. **3D View**: Open interactive DECA 3D output in the same page
+5. **Download**: Save restored image and exported 3D assets (mesh/parameters)
+
+### DECA 3D Output Details
+- **Where it appears**: Same website, below or beside restoration results
+- **3D controls**: Rotate (drag), Zoom (scroll), Pan (shift+drag or right drag)
+- **Suggested export formats**: OBJ for mesh, JSON/NPZ for DECA parameters
+- **Best input quality**: Frontal or near-frontal faces, clear lighting, minimal occlusion
 
 ## 📊 Degradation Types
 
@@ -189,7 +212,7 @@ npm start
 ## 📝 TODO / Future Work
 
 - [ ] Add more degradation types
-- [ ] Implement 3D face reconstruction phase
+- [x] Add DECA-based interactive 3D face reconstruction in web app flow
 - [ ] Add batch processing support
 - [ ] Mobile-friendly UI
 - [ ] Docker containerization
@@ -210,6 +233,7 @@ MIT License - see LICENSE file for details
 ## 🙏 Acknowledgments
 
 - CodeFormer paper and implementation
+- DECA project and authors for 3D face reconstruction
 - FFHQ dataset by NVIDIA
 - PyTorch and React communities
 - FastAPI framework

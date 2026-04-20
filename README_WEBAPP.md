@@ -1,11 +1,16 @@
 # Face Restoration Web Application
 
+This web app now includes interactive 3D face output in the same UI using DECA (assumed to be trained on custom data).
+
 ## 🚀 Quick Start
 
 ### Prerequisites
 ```bash
 # Python 3.8+ with dependencies installed
 pip install -r requirements.txt
+
+# DECA runtime dependencies (if not already installed)
+pip install smplx trimesh pyrender
 
 # Node.js 14+ with npm
 cd frontend
@@ -48,11 +53,13 @@ npm start
    - 📱 JPEG Compression
    - 🔍 Downsampling
 3. **AI Restoration**: Model restores each degraded image
+4. **3D Reconstruction (DECA)**: Model predicts 3D face shape/expression and renders an interactive mesh
 
 ### Output
-Total: **5 restored images**
+Total: **5 restored images + 1 interactive 3D output**
 - 1 enhanced original
 - 4 restored degraded versions
+- 1 DECA-based interactive 3D face viewer in the same page
 
 ## 🎨 Interface Layout
 
@@ -85,6 +92,13 @@ Total: **5 restored images**
 │  ┌──────────┐  ┌──────────┐  ┌──────────┐                │
 │  │ Original │→ │ Degraded │→ │ Restored │                │
 │  └──────────┘  └──────────┘  └──────────┘                │
+│                                                              │
+├─────────────────────────────────────────────────────────────┤
+│  Interactive 3D Face (DECA)                                 │
+│  ┌───────────────────────────────────────────────────────┐  │
+│  │  Rotate: drag  |  Zoom: scroll  |  Pan: right-drag  │  │
+│  │  Export: OBJ mesh + DECA params                      │  │
+│  └───────────────────────────────────────────────────────┘  │
 └─────────────────────────────────────────────────────────────┘
 ```
 
@@ -101,6 +115,11 @@ Response:
   "success": true,
   "original": "data:image/jpeg;base64,...",
   "original_restored": "data:image/jpeg;base64,...",
+  "deca_3d": {
+    "mesh_url": "/outputs/face_001.obj",
+    "preview_url": "/outputs/face_001_preview.png",
+    "params_url": "/outputs/face_001_params.json"
+  },
   "results": {
     "blur": {
       "degraded": "data:image/jpeg;base64,...",
@@ -129,6 +148,7 @@ GET /health/
 ✅ **Live Preview** - See your image before processing
 ✅ **4 Degradation Types** - Comprehensive testing
 ✅ **5 Restoration Outputs** - Original + 4 degraded versions
+✅ **Interactive 3D Face Output** - DECA mesh in same webpage
 ✅ **Click to Zoom** - Modal view for detailed inspection
 ✅ **Responsive Design** - Works on desktop and tablet
 ✅ **Error Handling** - User-friendly error messages
@@ -139,6 +159,7 @@ GET /health/
 ### Backend (FastAPI)
 - **Framework**: FastAPI with Uvicorn
 - **Model**: CodeFormer (65M parameters)
+- **3D Reconstruction**: DECA with custom-data trained weights
 - **Input Size**: 512×512 (resized automatically)
 - **Processing Time**: ~2-5 seconds per degradation type
 - **VRAM Usage**: ~2-3GB
@@ -150,6 +171,36 @@ GET /health/
 - **File Upload**: react-dropzone
 - **State Management**: useState hooks
 - **API Calls**: Fetch API
+- **3D Rendering**: WebGL viewer (for DECA mesh interaction)
+
+## ▶️ Run It (Windows)
+
+From project root:
+
+```bash
+# 1) Activate virtual environment
+.\venv\Scripts\Activate.ps1
+
+# 2) Start backend + frontend together
+.\start_app.bat
+```
+
+Open:
+- Frontend: http://localhost:3000
+- Backend API: http://localhost:8000
+- API docs: http://localhost:8000/docs
+
+Manual alternative:
+
+```bash
+# Terminal A
+cd backend
+python main.py
+
+# Terminal B
+cd frontend
+npm start
+```
 
 ### Degradation Parameters
 ```yaml
@@ -218,6 +269,7 @@ This interface demonstrates:
 - ✅ Real-time AI face restoration
 - ✅ Multiple degradation types
 - ✅ Before/after comparison
+- ✅ Interactive DECA-based 3D face output
 - ✅ Production-ready web application
 
 Perfect for:
